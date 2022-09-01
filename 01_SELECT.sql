@@ -307,5 +307,5 @@ ORDER BY 입사일;
 -- 정렬 중첩 : 대분류 정렬 후 소분류 정렬
 -- 부서코드 오름차순 정렬 후 급여 내림차순 정렬
 SELECT EMP_NAME ,DEPT_CODE ,SALARY 
-FROM EMPLOYEE e 
+FROM EMPLOYEE 
 ORDER BY DEPT_CODE,SALARY DESC ;
