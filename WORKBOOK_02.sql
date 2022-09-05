@@ -2,7 +2,7 @@
 
 -- 1. 영어영문학과(학과코드 002) 학생들의 학번과 이름, 입학년도를 입학년도가 빠른 순으로 표시하는 SQL문장을 작성하시오.
 -- 단, 헤더는 "학번", "이름", "입학년도"가 표시되도록 한다.
-SELECT STUDENT_NO 학번 , STUDENT_NAME 이름 , ENTRANCE_DATE 입학년도
+SELECT STUDENT_NO 학번 , STUDENT_NAME 이름 , TO_CHAR(ENTRANCE_DATE,'YYYY-MM-DD') 입학년도
 FROM TB_STUDENT ts
 WHERE DEPARTMENT_NO = '002'
 ORDER BY 3;
