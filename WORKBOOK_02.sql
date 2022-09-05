@@ -11,7 +11,7 @@ ORDER BY 3;
 -- 그 교수의 이름과 주민번호를 화면에 출력하는 SQL문장을 작성해보자
 SELECT PROFESSOR_NAME , PROFESSOR_SSN 
 FROM TB_PROFESSOR tp
-WHERE INSTR(PROFESSOR_NAME,1) 
+WHERE PROFESSOR_NAME NOT LIKE '___';
 
 
 -- 3. 춘 기술대학교의 남자 교수들의 이름과 나이를 출력하는 SQL문장을 작성하시오.
@@ -36,16 +36,25 @@ WHERE EXTRACT(YEAR FROM ENTRANCE_DATE)
 	 -EXTRACT(YEAR FROM TO_DATE(SUBSTR(STUDENT_SSN,1,6)))> 19;
 	
 -- 6. 2020년 크리스마스는 무슨 요일인가?
-SELECT EXTRACT (DAY FROM '2020-12-25') FROM DUAL;
+SELECT TO_CHAR(TO_DATE('20201225'),'day') FROM DUAL; --> 금요일
 
 -- 7. TO_DATE('99/10/11','YY/MM/DD'), TO_DATE('49/10/11','YY/MM/DD')은 각각 몇년몇월몇일을 의미할까?
 -- 또 TO_DATE('99/10/11','RR/MM/DD'), TO_DATE('49/10/11','RR/MM/DD')은 각각 몇년몇월몇일을 의미할까?
 -- YY: 2099/10/11 2049/10/11
 -- RR: 1999/10/11 2049/10/11
 	
--- 8.
+-- 8. 춘 기술대학교의 2000년도 이후 입학자들은 학번이 A로 시작하게 되어있다.
+-- 2000년도 이전 학번을 받은 학생들의 이름을 보여주는 SQL 문장을 작성하시오.
+SELECT STUDENT_NO ,STUDENT_NAME 
+FROM TB_STUDENT ts 
+WHERE SUBSTR(STUDENT_NO,1,1) != 'A' ;
 	
--- 9.
+-- 9. 학번이 A517178인 한아름 학생의 학점 총 평점을 구하는 SQL문을 작성하시오.
+-- 단, 이때 출력 화면의 헤더는 "평점"이라고 찍히게 하고, 점수는 반올림하여 소수점 이하 한자리까지만 표시한다.
+SELECT ROUND(AVG(POINT),1) 평점
+FROM TB_GRADE tg
+WHERE STUDENT_NO='A517178'
+
 
 -- 10. 학과별 학생수를 구하여 "학과번호", "학생수(명)"의 형태로 헤더를 만들어 결과값이 출력되도록 하시오.
 SELECT DEPARTMENT_NO 학과번호 , COUNT(*) "학생수(명)"
@@ -53,7 +62,10 @@ FROM TB_STUDENT ts
 GROUP BY DEPARTMENT_NO
 ORDER BY 1;
 
--- 11.
+-- 11. 지도교수를 배정받지 못한 학생의 수는 몇 명 정도 되는지 알아내는 SQL문을 작성하시오.
+SELECT COUNT(*)
+FROM TB_STUDENT ts 
+WHERE COACH_PROFESSOR_NO IS NULL;
 
 -- 12. 학번이 A112113인 김고운 학생의 년도 별 평점을 구하는 SQL문을 작성하시오.
 -- 단, 이때 출력 화면의 헤더는 "년도", "년도 별 평점"이라고 찍히게 하고, 점수는 반올림하여 소수점 이하 한 자리까지만 표시한다.
