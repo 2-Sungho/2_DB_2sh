@@ -108,7 +108,7 @@ SELECT SYSDATE FROM DUAL ;
 
 -- SYSTIMESTAMP : SYSDATE + MS 단위 추가
 SELECT SYSTIMESTAMP FROM DUAL ;
--- TIMESTAMP : 특정 시간을 나타낵나 기록하기 위한 문자열
+-- TIMESTAMP : 특정 시간을 나타내거나 기록하기 위한 문자열
 
 -- MONTHS_BETWEEN(날짜, 날짜) : 두 날짜의 개월 수 차이 반환
 SELECT ROUND(MONTHS_BETWEEN(SYSDATE,'2022-08-04'),3) "수강기간(개월)" FROM DUAL ; 
