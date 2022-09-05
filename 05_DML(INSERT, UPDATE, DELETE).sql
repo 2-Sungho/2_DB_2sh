@@ -8,6 +8,9 @@
 CREATE TABLE EMPLOYEE2 AS SELECT * FROM EMPLOYEE;
 CREATE TABLE DEPARTMENT2 AS SELECT * FROM DEPARTMENT;
 
+DROP TABLE EMPLOYEE2; 
+DROP TABLE DEPARTMENT2;
+
 SELECT * FROM EMPLOYEE2;
 SELECT * FROM DEPARTMENT2;
 
@@ -22,7 +25,8 @@ SELECT * FROM DEPARTMENT2;
 -- 테이블에 모든 컬럼에 대한 값을 INSERT할 때 사용
 -- INSERT하고자 하는 컬럼이 모든 컬럼인 경우 컬럼명 생략 가능. 단, 컬럼의 순서를 지켜서 VALUES에 값을 기입해야 함
 INSERT INTO EMPLOYEE2 
-VALUES('900','장채현','901230-2345678','jang_ch@kh.or.kr','01012341234','D1','J7','S3',4300000,0.2,200,SYSDATE,NULL,'N');
+VALUES('900','장채현','901230-2345678','jang_ch@kh.or.kr','01012341234',
+		'D1','J7','S3',4300000,0.2,200,SYSDATE,NULL,'N');
 
 SELECT * FROM EMPLOYEE2
 WHERE EMP_ID='900';
@@ -32,8 +36,17 @@ WHERE EMP_ID='900';
 -- 2)  INSERT INTO 테이블명(컬럼명, 컬럼명, 컬럼명,...)
 -- VALUES (데이터1, 데이터2, 데이터3, ...);
 -- 테이블에 내가 선택한 컬럼에 대한 값만 INSERT할 때 사용
--- 선택안된 컬럼은 값이 NULL이 들어감
+-- 선택안된 컬럼은 값이 NULL이 들어감(DEFAULT 존재 시 DEFAULT 값으로 삽입됨)
 
+INSERT INTO EMPLOYEE2(EMP_ID, EMP_NAME, EMP_NO, EMAIL, PHONE, 
+                      DEPT_CODE, JOB_CODE, SAL_LEVEL, SALARY)
+VALUES('900', '장채현', '901123-2345678', 'jang_ch@kh.or.kr', '01012341234',
+       'D1', 'J7', 'S3', 4300000);  
+
+SELECT * FROM EMPLOYEE2
+WHERE EMP_ID = '900';
+
+ROLLBACK;
 
 ---------------------------------------
 
@@ -44,49 +57,75 @@ CREATE TABLE EMP_01(
     DEPT_TITLE VARCHAR2(20)
 );
 
+SELECT * FROM EMP_01;
 
+SELECT EMP_ID, EMP_NAME, DEPT_TITLE
+FROM EMPLOYEE2
+LEFT JOIN DEPARTMENT2 ON(DEPT_CODE = DEPT_ID);
+
+-- 서브쿼리(SELECT) 결과를 EMP_01 테이블에 INSERT
+--> SELECT 조회 결과의 데이터 타입, 컬럼 개수가
+--  INSERT 하려는 테이블의 컬럼과 일치해야함
+--  (다만, 데이터 타입 자동 형변환이 적용됨)
+INSERT INTO EMP_01
+( SELECT EMP_ID, EMP_NAME, DEPT_TITLE
+  FROM EMPLOYEE2
+  LEFT JOIN DEPARTMENT2 ON(DEPT_CODE = DEPT_ID) );
+ 
+ 
 SELECT * FROM EMP_01;
 
 --------------------------------------------------------------------------------------------------------------------
 
--- 2. UPDATE
+-- 2. UPDATE(내용을 바꾸던가 추가해서 최신화, 새롭게하다)
 
 -- 테이블에 기록된 컬럼의 값을 수정하는 구문
 
 -- [작성법]
--- UPDATE 테이블명 SET 컬럼명 = 바꿀값 [WHERE 컬럼명 비교연산자 비교값];
+-- UPDATE 테이블명 SET 컬럼명 = 바꿀값 [*WHERE 컬럼명 비교연산자 비교값*];
+--> WHERE 조건 중요!
 
 -- DEPARTMENT2 테이블에서 DEPT_ID가 'D9'인 부서 정보 조회
-
+SELECT *
+FROM DEPARTMENT2;
 
 -- DEPARTMENT2 테이블에서 DEPT_ID가 'D9'인 행의 DEPT_TITLE을 '전략기획팀' 으로 수정
-
+UPDATE DEPARTMENT2 
+SET DEPT_TITLE='전략기획팀'
+WHERE DEPT_ID='D9';
 
 -- UPDATE 확인
+SELECT * FROM DEPARTMENT2
+COMMIT;
 
-
-
-
--- EMP_SALARY 테이블에서 BONUS를 받지 않는 사원의 
+-- EMPLOYEE2 테이블에서 BONUS를 받지 않는 사원의 
 -- BONUS를 0.1로 변경
+UPDATE EMPLOYEE2 
+SET BONUS = 0.1
+WHERE BONUS IS NULL;
 
-
+SELECT EMP_NAME , BONUS  FROM EMPLOYEE2 e; 
 
 ---------------------------------------
 
 -- * 조건절을 설정하지 않고 UPDATE 구문 실행 시 모든 행의 컬럼 값 변경.
+SELECT * FROM DEPARTMENT2 d ;
 
+UPDATE DEPARTMENT2 SET
+DEPT_TITLE = '기술연구팀2';
 
-
-
+ROLLBACK;
 ---------------------------------------
 
-
-
 -- * 여러 컬럼을 한번에 수정할 시 콤마(,)로 컬럼을 구분하면됨.
--- D9 / 전략기획팀  -> D0 / 전략기획2팀으로 수정
+-- D9 / 총무부  -> D0 / 전략기획2팀으로 수정
 
+UPDATE DEPARTMENT2  
+SET DEPT_ID = 'D0', DEPT_TITLE = '전략기획2팀'
+-- WHERE절 직전 컬럼 작성 후 콤마 X
+WHERE DEPT_ID = 'D9' AND DEPT_TITLE = '총무부';
 
+SELECT * FROM DEPARTMENT2 d ;
 
 ---------------------------------------
 
@@ -101,31 +140,18 @@ SELECT * FROM EMP_01;
 -- 급여와 보너스율을 유재식 사원과 동일하게 변경해 주기로 했다.
 -- 이를 반영하는 UPDATE문을 작성하시오.
 
-   
----------------------------------------
+-- 유재식 급여
+SELECT SALARY FROM EMPLOYEE2 e WHERE EMP_NAME = '유재식';
+-- 유재식 보너스
+SELECT BONUS FROM EMPLOYEE2 e WHERE EMP_NAME = '유재식';
 
+-- 방명수 급여, 보너스 수정
+UPDATE EMPLOYEE2
+SET SALARY=(SELECT SALARY FROM EMPLOYEE2 e WHERE EMP_NAME = '유재식'),
+BONUS=(SELECT BONUS FROM EMPLOYEE2 e WHERE EMP_NAME = '유재식')
+WHERE EMP_NAME = '방명수';
 
--- * 다중행 다중열 서브쿼리를 이용한 UPDATE문
-
--- EMPLOYEE2 테이블에서
--- 방명수 사원의 급여 인상 소식을 전해들은 다른 멤버들이
--- 단체로 파업을 진행했다.
--- 노옹철, 전형돈, 정중하, 하동운 사원의 급여와 보너스를
--- 유재식 사원의 급여와 보너스와 같게 변경하는 UPDATE문을 작성하시오.
-
-
-
-
-
-
--- EMP_SALARY테이블에서 아시아지역에 근무하는 직원의 보너스를 0.3으로 변경
-
-
--- 1) 아시아 지역에 근무하는 직원
-
-
--- 2) 아시아 지역 근무 직원 보너스 0.3으로 변경
-
+SELECT EMP_NAME,SALARY ,BONUS FROM EMPLOYEE2 e WHERE EMP_NAME IN ('유재식','방명수')
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -147,8 +173,8 @@ VALUES (999, '곽두원', '561016-1234567', 'kwack_dw@kh.or.kr',
         '01011112222', 'D9', 'J4', 'S1', 9000000, 0.5, NULL,
         SYSDATE, NULL, DEFAULT);
        
-SELECT * FROM EMP_M01; 
-SELECT * FROM EMP_M02;
+SELECT * FROM EMP_M01; -- 23명
+SELECT * FROM EMP_M02; -- 5명(기존4명+신규1명)
 
 UPDATE EMP_M02 SET SALARY = 0;
 
@@ -192,16 +218,24 @@ SELECT * FROM EMP_M01;
 COMMIT;
 
 -- EMPLOYEE2 테이블에서 '장채현'사원 정보 조회
-
+SELECT * FROM EMPLOYEE2 e WHERE EMP_NAME = '장채현';
 -- EMPLOYEE2 테이블에서 이름이 '장채현'인 사원 정보 삭제
+DELETE FROM EMPLOYEE2 WHERE EMP_NAME = '장채현';
+
+ROLLBACK;
 
 -- 삭제 확인
+SELECT * FROM EMPLOYEE2 e WHERE EMP_NAME = '장채현';
 
 -- EMPLOYEE2 테이블 전체 삭제
+SELECT * FROM EMPLOYEE2 e ;
+DELETE FROM EMPLOYEE2 e ; --> WHERE절 미작성 시 전체 삭제
 
+SELECT * FROM EMPLOYEE2 e ; --> 24행 삭제
+
+ROLLBACK;
 
 ---------------------------------------------------------------------------------------------
-
 
 -- 5. TRUNCATE (DDL 입니다! DML 아닙니다!)
 -- 테이블의 전체 행을 삭제하는 DDL
@@ -235,3 +269,6 @@ SELECT * FROM EMPLOYEE3;
 ROLLBACK;
 -- 롤백 후 복구 확인 -> 복구 안됨을 확인!
 SELECT * FROM EMPLOYEE3;
+
+-- DELETE : 휴지통 버리기
+-- TRUNCATE : 완전 삭제
